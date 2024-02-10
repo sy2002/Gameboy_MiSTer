@@ -1,53 +1,18 @@
-# [Gameboy](https://en.wikipedia.org/wiki/Game_Boy)  / [Gameboy Color](https://en.wikipedia.org/wiki/Game_Boy_Color) port to [MiSTer](https://github.com/MiSTer-devel/Main_MiSTer/wiki)
+Game Boy and Game Boy Color for MEGA65
+======================================
 
-This is port of [Gameboy for MiST](https://github.com/mist-devel/gameboy)
+This is a Git submodule of the Game Boy and Game Boy Color core for MEGA65. It is a fork of the MiSTer Game Boy core, which is itself based on MiST's Game Boy core.
 
-* Place RBF file into root of SD card.
-* Place *.gb|*.gbc files into Gameboy folder.
+**Go to https://github.com/sy2002/gbc4mega65/ to learn more.**
 
-## Features
-* Original Gameboy & Gameboy Color Support
-* Super Gameboy Support - Borders, Palettes and Multiplayer
-* MegaDuck Support
-* Custom Borders
-* SaveStates
-* Fastforward 
-* Rewind - Allows you to rewind up to 40 seconds of gameplay
-* Frameblending - Prevents flicker in some games (e.g. "Chikyuu Kaihou Gun Zas") 
-* Custom Palette Loading
-* Real-Time Clock Support
-* Gameboy Link Port Support - Requires USERIO adapter
-* Cheats
-* Fast boot
-* GBA mode for GBC games
 
-## Open Source Bootstrap roms
-Open source roms are included in the core, adapted from the SameBoy project [https://github.com/LIJI32/SameBoy/](https://github.com/LIJI32/SameBoy/). These roms have MiSTer-specific enhancements, allowing fast booting and GBA mode to be controlled by the on-screen display.
+The MEGA65 port is based on the [MiSTer2MEGA65 framework](https://github.com/sy2002/MiSTer2MEGA65). We forked the [MiSTer core](https://github.com/MiSTer-devel/Gameboy_MiSTer), so that we can easily track upstream changes and merge them into our MEGA65 port as needed. The following structure is being used:
 
- For maximum compatibility/authenticity you can still place the Gameboy bios/bootroms into the Gameboy folder and load them in the menu with `Bootroms->Load GBC/DMG/SGB boot`. 
+* [master](https://github.com/sy2002/Gameboy_MiSTer/tree/master) branch: Original MiSTer fork with the only exception that we changed this README.md
+* [C64MEGA65](https://github.com/sy2002/Gameboy_MiSTer/tree/C64MEGA65) branch: Contains our stable modifications of the upstream MiSTer core
+* [develop](https://github.com/sy2002/Gameboy_MiSTer/tree/develop) branch: Is our kind-of stable work-in-progress (WIP) development branch
 
-For more information see the [BootROM README](./BootROMs/README.md)  
+On modifications:
 
-## Palettes
-This core supports custom palettes (*.gbp) which should be placed into the Gameboy folder. Some examples are available in the palettes folder.
-
-## Custom Borders
-This core supports custom borders (*.sgb) which should be placed into the Gameboy folder. Some examples are available in the borders folder.
-
-## Autoload
-To autoload your favorite game at startup rename it to `boot2.rom`.
-
-## Video output
-The Gameboy can disable video output at any time which causes problems with vsync_adjust=2 or analog video during screen transitions. Enabling the Stabilize video option may fix this at the cost of some increased latency.
-
-# Savestates
-This core provides 4 slots to save and restore the memory state which means you can save at any point in the game. These can be saved to your SDCard or they can reside only in memory for temporary use (OSD Option). Save states can be performed with the Keyboard, a mapped button to a gamepad, or through the OSD.
-
-Keyboard Hotkeys for save states:
-- Alt+F1 thru Alt+F4 - save state
-- F1 thru F4 - restore state
-
-Gamepad:
-- Savestatebutton+Left or Right switches the savestate slot
-- Savestatebutton+Start+Down saves to the selected slot
-- Savestatebutton+Start+Up loads from the selected slot
+* Our strategy is to reduce the modifications to the upstream core to the bare minimum.
+* We made sure that the code is actually synthesizing using Vivado (used for the MEGA65), which is stricter and more unforgiving than Quartus (used for the MiSTer).
