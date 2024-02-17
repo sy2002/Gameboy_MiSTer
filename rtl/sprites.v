@@ -64,7 +64,7 @@ localparam SPRITES_PER_LINE = 10;
 
 reg [7:0] oam_spr_addr;
 wire [7:0] oam_fetch_addr;
-reg [7:0] oam_q;
+wire [7:0] oam_q;
 
 reg oam_eval_en;
 assign oam_eval = lcd_on & ~oam_eval_end & oam_eval_en & ~oam_eval_reset;
@@ -78,7 +78,7 @@ wire valid_oam_addr = (oam_addr[7:4] < 4'hA); // $FEA0 - $FEFF unused range
 assign oam_do = dma_active ? 8'hFF : valid_oam_addr ? oam_q : 8'd0;
 
 
-dpram #(8) oam_data (
+dualport_2clk_ram #(8) oam_data (
 	.clock_a   (clk      ),
 	.address_a (oam_addr ),
 	.wren_a    (ce_cpu && oam_wr && valid_oam_addr),

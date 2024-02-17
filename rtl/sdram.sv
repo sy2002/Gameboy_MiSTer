@@ -30,7 +30,7 @@ module sdram
 (
 
 	// interface to the MT48LC16M16 chip
-	inout  reg [15:0] sd_data,    // 16 bit bidirectional data bus
+	inout      [15:0] sd_data,    // 16 bit bidirectional data bus
 	output reg [12:0]	sd_addr,    // 13 bit multiplexed address bus
 	output     [1:0] 	sd_dqm,     // two byte masks
 	output reg [1:0] 	sd_ba,      // two banks
@@ -64,6 +64,15 @@ localparam NO_WRITE_BURST = 1'b1;   // 0= write burst enabled, 1=only single acc
 
 localparam MODE = { 3'b000, NO_WRITE_BURST, OP_MODE, CAS_LATENCY, ACCESS_TYPE, BURST_LENGTH}; 
 
+/* Fix Vivado Synth 8-2577 error that arose because sd_data is a bi-directional bus and
+   therefore "reg" was not appropriate. Done by sy2002 on 2/12/24 */
+   
+// Internal representation
+logic [15:0] sd_data_internal;
+logic drive_sd_data; // Control signal to drive or not drive sd_data
+
+// Driving sd_data conditionally
+assign sd_data = drive_sd_data ? sd_data_internal : 16'hz;
 
 // ---------------------------------------------------------------------
 // ------------------------ cycle state machine ------------------------
@@ -135,7 +144,9 @@ always @(posedge clk) begin
 	if(~old_oe && oe && ~autorefresh)     stage <= 1; // react on request only with fastforward
 
 	sd_cmd <= CMD_INHIBIT;  // default: idle
-	sd_data <= 16'hZZZZ;
+	
+	drive_sd_data <= 1'b0;
+	//sd_data <= 16'hZZZZ;
 
 	if(reset != 0) begin
 		// initialization takes place at the end of the reset phase
@@ -179,7 +190,10 @@ always @(posedge clk) begin
 		if(stage == STATE_CMD_CONT && mode) begin
 			sd_cmd  <= mode[1] ? CMD_WRITE : CMD_READ;
 			sd_addr <= addr_r;
-			if(mode[1]) sd_data <= din_r;
+			if (mode[1]) begin
+			   sd_data_internal <= din_r;
+			   drive_sd_data <= 1'b1;
+			end
 		end
 
 		if(stage == STATE_HIGHZ) begin

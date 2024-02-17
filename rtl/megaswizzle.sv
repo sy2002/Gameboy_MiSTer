@@ -2,13 +2,13 @@ module megaduck_swizzle
 (
 	input megaduck,
 	input [15:0] a_in,
-	output [15:0] a_out,
+	output logic [15:0] a_out,
 
 	input [7:0] snd_in_di,
-	output [7:0] snd_in_do,
+	output logic [7:0] snd_in_do,
 
 	input [7:0] snd_out_di,
-	output [7:0] snd_out_do
+	output logic [7:0] snd_out_do
 );
 
 // Swizzle around MegaDuck register to match GB registers.

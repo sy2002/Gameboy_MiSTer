@@ -1706,8 +1706,9 @@ architecture apu_dac_arch of apu_dac is
 	-- Analog value has range [-256, 255], which will decay to zero when a DAC is disabled.
 	-- Sameboy uses a DAC decay speed tick of every 50 us, with 120 amplitude steps => Total decay in 6 ms.
 	-- For a 6 ms decay from max output (255), we want to tick the analog value down every ~100 clock cycles (f_clk = 4.19 MHz).
-	signal   dac_decay_timer 	: integer range 0 to 100 := 0;
-	constant DAC_DECAY_PERIOD	: integer := dac_decay_timer'high;  -- Tick rate 41.5 kHz, full decay  6.1 ms
+	subtype  dac_timer_range is integer range 0 to 100;
+	signal   dac_decay_timer 	: dac_timer_range := 0;
+	constant DAC_DECAY_PERIOD	: integer := dac_timer_range'high;  -- Tick rate 41.5 kHz, full decay  6.1 ms
 	signal   dac_analog 	   	: signed(8 downto 0);
 
 	-- Convert a DAC input code to a pseudo-analog value

@@ -748,7 +748,7 @@ wire [12:0] vram_addr = video_rd?video_addr:(hdma_rd&&isGBC)?hdma_target_addr[12
 
 wire [7:0] Savestate_RAMReadData_VRAM0, Savestate_RAMReadData_VRAM1;
 
-dpram #(13) vram0 (
+dualport_2clk_ram #(13) vram0 (
 	.clock_a   (clk_cpu  ),
 	.address_a (vram_addr),
 	.wren_a    (vram_wren),
@@ -763,7 +763,7 @@ dpram #(13) vram0 (
 );
 
 //separate 8k for vbank1 for gbc because of BG reads
-dpram #(13) vram1 (
+dualport_2clk_ram #(13) vram1 (
 	.clock_a   (clk_cpu   ),
 	.address_a (vram_addr ),
 	.wren_a    (vram1_wren),
@@ -831,7 +831,7 @@ hdma hdma(
 // 127 bytes internal zero page ram from $ff80 to $fffe
 wire cpu_wr_zpram = sel_zpram && !cpu_wr_n;
 
-dpram #(7) zpram (
+dualport_2clk_ram #(7) zpram (
 	.clock_a   (clk_cpu      ),
 	.address_a (cpu_addr[6:0]),
 	.wren_a    (cpu_wr_zpram ),
@@ -864,7 +864,7 @@ wire [12:0] wram_addr_i = ~isGBC ? ext_bus_addr[12:0] :
 wire [14:0] wram_addr = (wram_addr_i[12]) ? { wram_bank, wram_addr_i[11:0] }  // bank 1-7 $D000-DFFF
                                           : {      3'd0, wram_addr_i[11:0] }; // bank 0   $C000-CFFF
 
-dpram #(15) wram (
+dualport_2clk_ram #(15) wram (
 	.clock_a   (clk_cpu),
 	.address_a (wram_addr),
 	.wren_a    (wram_wren),
@@ -937,15 +937,21 @@ wire [10:0] boot_wr_addr =
 
 wire [7:0] boot_q;
 
-dpram_dif #(12,8,11,16,"BootROMs/cgb_boot.mif") boot_rom (
-	.clock (clk_sys),
-
+dualport_2clk_ram #(
+    .ADDR_WIDTH(12),
+    .DATA_WIDTH(8),
+    .ROM_FILE("../../CORE/Gameboy_MiSTer/BootROMs/cgb_boot.rom")
+) boot_rom (
+	.clock_a (clk_sys),
 	.address_a (boot_addr),
-	.q_a (boot_q),
+	.q_a (boot_q)
 
+/*
+   .clock_b (clk_sys),
 	.address_b (boot_wr_addr),
 	.wren_b (ioctl_wr && boot_download),
 	.data_b (ioctl_dout)
+*/
 );
 
 reg [7:0] boot_do_gba;
