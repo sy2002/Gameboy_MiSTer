@@ -34,7 +34,7 @@ module lcd
 	input        originalcolors,
 	input        analog_wide,
 
-	input        on,
+	input        lcd_on,
 
 	// VGA output
 	input            clk_vid, // 67.108864 MHz
@@ -65,8 +65,8 @@ always @(posedge clk_sys) begin
 	reg old_lcd_off, old_lcd_vs;
 	reg [8:0] blank_hcnt,blank_vcnt;
 
-	lcd_off <= !on || (mode == 2'd01);
-	blank_de <= (!on && blank_output && blank_hcnt < 160 && blank_vcnt < 144);
+	lcd_off <= !lcd_on || (mode == 2'd01);
+	blank_de <= (!lcd_on && blank_output && blank_hcnt < 160 && blank_vcnt < 144);
 
 	if (pix_wr) vbuffer_inptr <= vbuffer_inptr + 1'd1;
 
@@ -79,10 +79,10 @@ always @(posedge clk_sys) begin
 	end
 
 	// Delay blanking the screen for GBC
-	if (on) lcd_off_cnt <= 0;
+	if (lcd_on) lcd_off_cnt <= 0;
 	else if (ce & ~&lcd_off_cnt) lcd_off_cnt <= lcd_off_cnt + 1'b1;
 
-	if (~on) begin  // LCD disabled, start blank output
+	if (~lcd_on) begin  // LCD disabled, start blank output
 		lcd_freeze <= 1;
 		if ( (~isGBC | (lcd_off_cnt > BLANK_DELAY) ) & ~blank_output) begin
 			blank_output <= 1'b1;
@@ -91,7 +91,7 @@ always @(posedge clk_sys) begin
 	end
 
 	// Regenerate LCD timings for filling with blank color when LCD is off
-	if (ce & ~on & blank_output) begin
+	if (ce & ~lcd_on & blank_output) begin
 		blank_data <= data;
 		blank_hcnt <= blank_hcnt + 1'b1;
 		if (blank_hcnt == 9'd455) begin
@@ -116,7 +116,7 @@ always @(posedge clk_sys) begin
 end
 
 reg [14:0] vbuffer[65536];
-always @(posedge clk_sys) if(pix_wr) vbuffer[{vbuffer_in_bank, vbuffer_inptr}] <= (on & blank_output) ? blank_data : data;
+always @(posedge clk_sys) if(pix_wr) vbuffer[{vbuffer_in_bank, vbuffer_inptr}] <= (lcd_on & blank_output) ? blank_data : data;
 
 
 // Mode 00:  h-blank
@@ -232,10 +232,10 @@ always @(posedge clk_vid) begin
 	end
 
 	old_lcd_off <= lcd_off;
-	old_on <= on;
+	old_on <= lcd_on;
 	if (~double_buffer) begin
 		// Lcd turned on. Wait in vblank for output reset.
-		if (~old_on & on & ~vb) wait_vbl <= 1'b1; // lcd enabled
+		if (~old_on & lcd_on & ~vb) wait_vbl <= 1'b1; // lcd enabled
 
 		if (old_lcd_off & ~lcd_off & vb) begin // lcd enabled or out of vblank
 			wait_vbl <= 0;
