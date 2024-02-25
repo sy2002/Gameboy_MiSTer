@@ -940,7 +940,9 @@ wire [7:0] boot_q;
 dualport_2clk_ram #(
     .ADDR_WIDTH(12),
     .DATA_WIDTH(8),
-    .ROM_FILE("../../CORE/Gameboy_MiSTer/BootROMs/cgb_boot.rom")
+    .ROM_PRELOAD(1),
+    .ROM_FILE("../../CORE/Gameboy_MiSTer/BootROMs/cgb_boot.hex"),
+    .ROM_FILE_HEX(1)
 ) boot_rom (
 	.clock_a (clk_sys),
 	.address_a (boot_addr),
